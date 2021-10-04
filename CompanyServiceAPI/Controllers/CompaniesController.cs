@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CompanyServiceAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CompanyServiceAPI.Controllers
 {
@@ -22,6 +23,7 @@ namespace CompanyServiceAPI.Controllers
 
         // GET: api/Companies
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
         {
             return await _context.Company.ToListAsync();

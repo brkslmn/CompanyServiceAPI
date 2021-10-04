@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CompanyServiceAPI.Models;
 
 namespace CompanyServiceAPI.Models
 {
@@ -21,6 +22,7 @@ namespace CompanyServiceAPI.Models
         public DbSet<Log> Log { get; set; }
         public DbSet<Role> Role { get; set; }
         public DbSet<UserLog> UserLog { get; set; }
+        public DbSet<CompanyServiceAPI.Models.User> User { get; set; }
         
     }
 }

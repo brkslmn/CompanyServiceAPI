@@ -13,6 +13,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using CompanyServiceAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using CompanyServiceAPI.Controllers;
 
 namespace CompanyServiceAPI
 {
@@ -28,6 +30,24 @@ namespace CompanyServiceAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "JwtBearer";
+                options.DefaultChallengeScheme = "JwtBearer";
+            })
+            .AddJwtBearer("JwtBearer", jwtOptions =>
+             {
+                 jwtOptions.TokenValidationParameters = new TokenValidationParameters()
+                 {
+                     IssuerSigningKey = TokenController.SIGNING_KEY,
+                     ValidateIssuer = false,
+                     ValidateAudience = false,
+                     ValidateIssuerSigningKey = true,
+                     ValidateLifetime = true,
+                     ClockSkew = TimeSpan.FromMinutes(5)
+                 };
+             });
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DevConnection")));
             services.AddControllers();
@@ -40,13 +60,15 @@ namespace CompanyServiceAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CompanyServiceAPI v1"));
             }
-
+            app.UseAuthentication();
+           
             app.UseHttpsRedirection();
 
             app.UseRouting();
