@@ -11,6 +11,7 @@ namespace CompanyServiceAPI.Models
         public Role()
         {
             this.Employee = new HashSet<Employee>();
+            
         }
         [Key]
         public int Id { get; set; }
@@ -19,5 +20,6 @@ namespace CompanyServiceAPI.Models
 
 
         public virtual ICollection<Employee> Employee { get; set; }
+        public virtual ICollection<User> User { get; set; }
     }
 }

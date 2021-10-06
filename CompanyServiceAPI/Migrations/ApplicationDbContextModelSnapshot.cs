@@ -59,14 +59,9 @@ namespace CompanyServiceAPI.Migrations
                     b.Property<string>("DepartmentName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("EmployeeId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
-
-                    b.HasIndex("EmployeeId");
 
                     b.ToTable("Department");
                 });
@@ -103,6 +98,8 @@ namespace CompanyServiceAPI.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Employee");
                 });
@@ -162,6 +159,12 @@ namespace CompanyServiceAPI.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Role")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Token")
                         .HasColumnType("nvarchar(max)");
 
@@ -169,6 +172,8 @@ namespace CompanyServiceAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("User");
                 });
@@ -219,10 +224,22 @@ namespace CompanyServiceAPI.Migrations
                     b.HasOne("CompanyServiceAPI.Models.Company", null)
                         .WithMany("Department")
                         .HasForeignKey("CompanyId");
+                });
 
-                    b.HasOne("CompanyServiceAPI.Models.Employee", null)
-                        .WithMany("Department")
-                        .HasForeignKey("EmployeeId");
+            modelBuilder.Entity("CompanyServiceAPI.Models.Employee", b =>
+                {
+                    b.HasOne("CompanyServiceAPI.Models.Department", null)
+                        .WithMany("Employee")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CompanyServiceAPI.Models.User", b =>
+                {
+                    b.HasOne("CompanyServiceAPI.Models.Role", null)
+                        .WithMany("User")
+                        .HasForeignKey("RoleId");
                 });
 
             modelBuilder.Entity("CompanyServiceAPI.Models.UserLog", b =>
@@ -254,11 +271,19 @@ namespace CompanyServiceAPI.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("CompanyServiceAPI.Models.Department", b =>
+                {
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("CompanyServiceAPI.Models.Employee", b =>
                 {
-                    b.Navigation("Department");
-
                     b.Navigation("UserLog");
+                });
+
+            modelBuilder.Entity("CompanyServiceAPI.Models.Role", b =>
+                {
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

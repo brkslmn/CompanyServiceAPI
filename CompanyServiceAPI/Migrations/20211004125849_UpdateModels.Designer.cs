@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyServiceAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211004074321_AddUserModel")]
-    partial class AddUserModel
+    [Migration("20211004125849_UpdateModels")]
+    partial class UpdateModels
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -164,6 +164,12 @@ namespace CompanyServiceAPI.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Role")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Token")
                         .HasColumnType("nvarchar(max)");
 
@@ -171,6 +177,8 @@ namespace CompanyServiceAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("User");
                 });
@@ -227,6 +235,13 @@ namespace CompanyServiceAPI.Migrations
                         .HasForeignKey("EmployeeId");
                 });
 
+            modelBuilder.Entity("CompanyServiceAPI.Models.User", b =>
+                {
+                    b.HasOne("CompanyServiceAPI.Models.Role", null)
+                        .WithMany("User")
+                        .HasForeignKey("RoleId");
+                });
+
             modelBuilder.Entity("CompanyServiceAPI.Models.UserLog", b =>
                 {
                     b.HasOne("CompanyServiceAPI.Models.Employee", "Employee")
@@ -261,6 +276,11 @@ namespace CompanyServiceAPI.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("UserLog");
+                });
+
+            modelBuilder.Entity("CompanyServiceAPI.Models.Role", b =>
+                {
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

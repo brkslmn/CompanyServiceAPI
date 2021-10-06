@@ -22,7 +22,7 @@ namespace CompanyServiceAPI.Services
         //Change with database user
         private List<User> _users = new List<User>
         {
-            new User { Id = 1, FirstName = "Burak", LastName = "Salman", Username = "brkslmn", Password = "1234" },
+            new User { Id = 1, FirstName = "Burak", LastName = "Salman", Username = "brkslmn", Password = "1234", Role="1" },
         };
 
         private readonly AppSettings _appSettings;
@@ -45,7 +45,9 @@ namespace CompanyServiceAPI.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, user.Id.ToString())
+                    new Claim(ClaimTypes.Role, user.Role.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username.ToString())
+                    
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

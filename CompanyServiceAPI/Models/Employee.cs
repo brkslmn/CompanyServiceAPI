@@ -11,7 +11,7 @@ namespace CompanyServiceAPI.Models
     {
         public Employee()
         {
-            this.Department = new HashSet<Department>();
+           
             this.UserLog = new HashSet<UserLog>();
             this.Role = new HashSet<Role>();
         }
@@ -26,7 +26,7 @@ namespace CompanyServiceAPI.Models
         public float Salary { get; set; }
         public int RoleId { get; set; }
 
-        public virtual ICollection<Department> Department { get; set; }
+       
         public virtual ICollection<UserLog> UserLog { get; set; }
         public virtual ICollection<Role> Role { get; set; }
     }

@@ -34,35 +34,18 @@ namespace CompanyServiceAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //----------------------------------------------------------------------------------------
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultAuthenticateScheme = "JwtBearer";
-            //    options.DefaultChallengeScheme = "JwtBearer";
-            //})
-            //.AddJwtBearer("JwtBearer", jwtOptions =>
-            // {
-            //     jwtOptions.TokenValidationParameters = new TokenValidationParameters()
-            //     {
-            //         IssuerSigningKey = TokenController.SIGNING_KEY,
-            //         ValidateIssuer = false,
-            //         ValidateAudience = false,
-            //         ValidateIssuerSigningKey = true,
-            //         ValidateLifetime = true,
-            //         ClockSkew = TimeSpan.FromMinutes(5)
-            //     };
-            // });
-            //-------------------------------------------------------------------------------------------
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DevConnection")));
+
             services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CompanyServiceAPI", Version = "v1" });
             });
             
-            //------------------------------------------------------------------------------------------
+            
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
 
@@ -79,14 +62,21 @@ namespace CompanyServiceAPI
                 x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
+                    
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.FromMinutes(5),
+
+                    ValidIssuer = "http://localhost:5001",
+                    ValidAudience = "http://localhost:5001",
+
                 };
             });
+
             services.AddScoped<IUserService, UserService>();
-            //------------------------------------------------------------------------------------------
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
