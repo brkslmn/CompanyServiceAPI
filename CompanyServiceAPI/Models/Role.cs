@@ -11,6 +11,7 @@ namespace CompanyServiceAPI.Models
         public Role()
         {
             this.Employee = new HashSet<Employee>();
+            this.User = new HashSet<User>();
             
         }
         [Key]

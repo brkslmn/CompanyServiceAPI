@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace CompanyServiceAPI.Migrations
 {
-    public partial class FirstMigration : Migration
+    public partial class AddUserModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -21,26 +21,6 @@ namespace CompanyServiceAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Company", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Employee",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    StartsDateOfWork = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Salary = table.Column<float>(type: "real", nullable: false),
-                    RoleId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Employee", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -73,6 +53,23 @@ namespace CompanyServiceAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "User",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_User", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Department",
                 columns: table => new
                 {
@@ -80,8 +77,7 @@ namespace CompanyServiceAPI.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DepartmentName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DepartmentLoc = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CompanyId = table.Column<int>(type: "int", nullable: true),
-                    EmployeeId = table.Column<int>(type: "int", nullable: true)
+                    CompanyId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -92,34 +88,56 @@ namespace CompanyServiceAPI.Migrations
                         principalTable: "Company",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Department_Employee_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employee",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserLog",
+                name: "RoleUser",
+                columns: table => new
+                {
+                    RoleId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoleUser", x => new { x.RoleId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_RoleUser_Role_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Role",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RoleUser_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Employee",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    LogTime = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    IpAdress = table.Column<int>(type: "int", nullable: false),
-                    UserRole = table.Column<int>(type: "int", nullable: true),
-                    EmployeeId = table.Column<int>(type: "int", nullable: true)
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    StartsDateOfWork = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Salary = table.Column<float>(type: "real", nullable: false),
+                    RoleId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserLog", x => x.Id);
+                    table.PrimaryKey("PK_Employee", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserLog_Employee_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employee",
+                        name: "FK_Employee_Department_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Department",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -147,26 +165,23 @@ namespace CompanyServiceAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "User",
+                name: "UserLog",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Token = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RoleId = table.Column<int>(type: "int", nullable: true)
+                    LogTime = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    IpAdress = table.Column<int>(type: "int", nullable: false),
+                    UserRole = table.Column<int>(type: "int", nullable: true),
+                    EmployeeId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.Id);
+                    table.PrimaryKey("PK_UserLog", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_User_Role_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Role",
+                        name: "FK_UserLog_Employee_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employee",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -177,9 +192,9 @@ namespace CompanyServiceAPI.Migrations
                 column: "CompanyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Department_EmployeeId",
-                table: "Department",
-                column: "EmployeeId");
+                name: "IX_Employee_DepartmentId",
+                table: "Employee",
+                column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EmployeeRole_RoleId",
@@ -187,9 +202,9 @@ namespace CompanyServiceAPI.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_User_RoleId",
-                table: "User",
-                column: "RoleId");
+                name: "IX_RoleUser_UserId",
+                table: "RoleUser",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserLog_EmployeeId",
@@ -200,28 +215,31 @@ namespace CompanyServiceAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Department");
-
-            migrationBuilder.DropTable(
                 name: "EmployeeRole");
 
             migrationBuilder.DropTable(
                 name: "Log");
 
             migrationBuilder.DropTable(
-                name: "User");
+                name: "RoleUser");
 
             migrationBuilder.DropTable(
                 name: "UserLog");
 
             migrationBuilder.DropTable(
-                name: "Company");
-
-            migrationBuilder.DropTable(
                 name: "Role");
 
             migrationBuilder.DropTable(
+                name: "User");
+
+            migrationBuilder.DropTable(
                 name: "Employee");
+
+            migrationBuilder.DropTable(
+                name: "Department");
+
+            migrationBuilder.DropTable(
+                name: "Company");
         }
     }
 }
