@@ -4,6 +4,7 @@ using CompanyServiceAPI.Models;
 using CompanyServiceAPI.Models.Users;
 using CompanyServiceAPI.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

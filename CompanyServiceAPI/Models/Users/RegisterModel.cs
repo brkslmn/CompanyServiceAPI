@@ -20,7 +20,7 @@ namespace CompanyServiceAPI.Models.Users
         [Required]
         public string Password { get; set; }
         
-        [Required]
-        public int Role { get; set; }
+        //[Required]
+        //public int Role { get; set; }
     }
 }
