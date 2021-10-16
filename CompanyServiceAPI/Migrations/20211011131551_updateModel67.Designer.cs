@@ -4,14 +4,16 @@ using CompanyServiceAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CompanyServiceAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211011131551_updateModel67")]
+    partial class updateModel67
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,7 +52,7 @@ namespace CompanyServiceAPI.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CompanyId")
+                    b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<string>("DepartmentLoc")
@@ -87,6 +89,9 @@ namespace CompanyServiceAPI.Migrations
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.Property<float>("Salary")
                         .HasColumnType("real");
@@ -193,6 +198,21 @@ namespace CompanyServiceAPI.Migrations
                     b.ToTable("UserLog");
                 });
 
+            modelBuilder.Entity("EmployeeRole", b =>
+                {
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("EmployeeId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("EmployeeRole");
+                });
+
             modelBuilder.Entity("RoleUser", b =>
                 {
                     b.Property<int>("RoleId")
@@ -212,7 +232,9 @@ namespace CompanyServiceAPI.Migrations
                 {
                     b.HasOne("CompanyServiceAPI.Models.Company", "Company")
                         .WithMany("Department")
-                        .HasForeignKey("CompanyId");
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Company");
                 });
@@ -233,6 +255,21 @@ namespace CompanyServiceAPI.Migrations
                         .HasForeignKey("EmployeeId");
 
                     b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("EmployeeRole", b =>
+                {
+                    b.HasOne("CompanyServiceAPI.Models.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CompanyServiceAPI.Models.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RoleUser", b =>

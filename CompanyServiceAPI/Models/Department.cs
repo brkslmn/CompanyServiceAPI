@@ -18,5 +18,7 @@ namespace CompanyServiceAPI.Models
         public string DepartmentLoc { get; set; }
 
         public virtual ICollection<Employee> Employee { get; set; }
+        //public int CompanyId{get; set;}
+        public Company Company {get; set;}
     }
 }

@@ -20,6 +20,8 @@ using CompanyServiceAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using AutoMapper;
+using Newtonsoft;
+
 
 namespace CompanyServiceAPI
 {
@@ -37,7 +39,13 @@ namespace CompanyServiceAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            //services.AddMvc().AddJsonOptions(options => {
+            //    options.SerializerSettings.MaxDepth = 64;
+            //});
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(_configuration.GetConnectionString("DevConnection")));
             services.AddCors();

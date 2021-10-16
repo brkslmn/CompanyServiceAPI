@@ -1,5 +1,6 @@
 ﻿using CompanyServiceAPI.Helpers;
 using CompanyServiceAPI.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -52,12 +53,13 @@ namespace CompanyServiceAPI.Services
 
         public IEnumerable<User> GetAll()
         {
-            return _context.User;
+            return _context.User.Include(x=>x.Role);
         }
 
         public User GetById(int id)
         {
-            return _context.User.Find(id);
+            
+            return _context.User.Include(x => x.Role).FirstOrDefault(c => c.Id == id);
         }
 
         public User Create(User user, string password)

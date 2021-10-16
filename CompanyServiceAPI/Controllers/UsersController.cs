@@ -48,12 +48,13 @@ namespace CompanyServiceAPI.Controllers
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+           
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username.ToString()),
+                    new Claim(ClaimTypes.NameIdentifier, user.Username),
                     new Claim(ClaimTypes.Role, user.Role.ToString()),
                     
                 }),
@@ -96,19 +97,21 @@ namespace CompanyServiceAPI.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetAll()
         {
             var users = _userService.GetAll();
-            var model = _mapper.Map<IList<UserModel>>(users);
+            var model = _mapper.Map<IList<User>>(users);
             return Ok(model);
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public IActionResult GetById(int id)
         {
             var user = _userService.GetById(id);
-            var model = _mapper.Map<UserModel>(user);
-            return Ok(model);
+            var model = _mapper.Map<User>(user);
+            return Ok(user);
         }
 
         [HttpPut("{id}")]

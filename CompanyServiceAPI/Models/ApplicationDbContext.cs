@@ -24,5 +24,6 @@ namespace CompanyServiceAPI.Models
         public DbSet<UserLog> UserLog { get; set; }
         public DbSet<User> User { get; set; }
         
+        
     }
 }

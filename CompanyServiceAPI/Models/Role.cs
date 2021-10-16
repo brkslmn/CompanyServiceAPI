@@ -6,21 +6,16 @@ using System.Threading.Tasks;
 
 namespace CompanyServiceAPI.Models
 {
-    public class Role
+    public partial class Role
     {
         public Role()
         {
-            this.Employee = new HashSet<Employee>();
             this.User = new HashSet<User>();
-            
         }
         [Key]
         public int Id { get; set; }
         public string RoleName { get; set; }
         public string Description { get; set; }
-
-
-        public virtual ICollection<Employee> Employee { get; set; }
         public virtual ICollection<User> User { get; set; }
     }
 }
