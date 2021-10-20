@@ -23,6 +23,7 @@ namespace CompanyServiceAPI.Models
         public DbSet<Role> Role { get; set; }
         public DbSet<UserLog> UserLog { get; set; }
         public DbSet<User> User { get; set; }
+        public DbSet<CompanyServiceAPI.Models.Device> Device { get; set; }
         
         
     }

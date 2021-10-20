@@ -6,54 +6,52 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CompanyServiceAPI.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace CompanyServiceAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CompaniesController : ControllerBase
+    public class DevicesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public CompaniesController(ApplicationDbContext context)
+        public DevicesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Companies
+        // GET: api/Devices
         [HttpGet]
-        //[Authorize]
-        public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
+        public async Task<ActionResult<IEnumerable<Device>>> GetDevice()
         {
-            return await _context.Company.Include(x=>x.Department).ToListAsync();
+            return await _context.Device.ToListAsync();
         }
 
-        // GET: api/Companies/5
+        // GET: api/Devices/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Company>> GetCompany(int id)
+        public async Task<ActionResult<Device>> GetDevice(int id)
         {
-            var company = _context.Company.Include(x=>x.Department).FirstOrDefault(c => c.Id == id);
+            var device = await _context.Device.FindAsync(id);
 
-            if (company == null)
+            if (device == null)
             {
                 return NotFound();
             }
 
-            return company;
+            return device;
         }
 
-        // PUT: api/Companies/5
+        // PUT: api/Devices/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCompany(int id, Company company)
+        public async Task<IActionResult> PutDevice(int id, Device device)
         {
-            if (id != company.Id)
+            if (id != device.id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(company).State = EntityState.Modified;
+            _context.Entry(device).State = EntityState.Modified;
 
             try
             {
@@ -61,7 +59,7 @@ namespace CompanyServiceAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CompanyExists(id))
+                if (!DeviceExists(id))
                 {
                     return NotFound();
                 }
@@ -74,36 +72,36 @@ namespace CompanyServiceAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/Companies
+        // POST: api/Devices
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Company>> PostCompany(Company company)
+        public async Task<ActionResult<Device>> PostDevice(Device device)
         {
-            _context.Company.Add(company);
+            _context.Device.Add(device);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCompany", new { id = company.Id }, company);
+            return CreatedAtAction("GetDevice", new { id = device.id }, device);
         }
 
-        // DELETE: api/Companies/5
+        // DELETE: api/Devices/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCompany(int id)
+        public async Task<IActionResult> DeleteDevice(int id)
         {
-            var company = await _context.Company.FindAsync(id);
-            if (company == null)
+            var device = await _context.Device.FindAsync(id);
+            if (device == null)
             {
                 return NotFound();
             }
 
-            _context.Company.Remove(company);
+            _context.Device.Remove(device);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool CompanyExists(int id)
+        private bool DeviceExists(int id)
         {
-            return _context.Company.Any(e => e.Id == id);
+            return _context.Device.Any(e => e.id == id);
         }
     }
 }
