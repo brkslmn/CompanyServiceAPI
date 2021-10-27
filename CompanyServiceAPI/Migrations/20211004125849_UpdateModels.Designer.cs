@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyServiceAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211003133625_UpdateModels2")]
-    partial class UpdateModels2
+    [Migration("20211004125849_UpdateModels")]
+    partial class UpdateModels
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -92,9 +92,6 @@ namespace CompanyServiceAPI.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -106,9 +103,6 @@ namespace CompanyServiceAPI.Migrations
 
                     b.Property<DateTime>("StartsDateOfWork")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -152,6 +146,41 @@ namespace CompanyServiceAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Role");
+                });
+
+            modelBuilder.Entity("CompanyServiceAPI.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("CompanyServiceAPI.Models.UserLog", b =>
@@ -206,6 +235,13 @@ namespace CompanyServiceAPI.Migrations
                         .HasForeignKey("EmployeeId");
                 });
 
+            modelBuilder.Entity("CompanyServiceAPI.Models.User", b =>
+                {
+                    b.HasOne("CompanyServiceAPI.Models.Role", null)
+                        .WithMany("User")
+                        .HasForeignKey("RoleId");
+                });
+
             modelBuilder.Entity("CompanyServiceAPI.Models.UserLog", b =>
                 {
                     b.HasOne("CompanyServiceAPI.Models.Employee", "Employee")
@@ -240,6 +276,11 @@ namespace CompanyServiceAPI.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("UserLog");
+                });
+
+            modelBuilder.Entity("CompanyServiceAPI.Models.Role", b =>
+                {
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

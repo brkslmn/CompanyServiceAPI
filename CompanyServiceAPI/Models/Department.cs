@@ -8,10 +8,15 @@ namespace CompanyServiceAPI.Models
 {
     public class Department
     {
+        public Department()
+        {
+            this.Employee = new HashSet<Employee>();
+        }
         [Key]
         public int Id { get; set; }
         public string DepartmentName { get; set; }
         public string DepartmentLoc { get; set; }
-        
+
+        public virtual ICollection<Employee> Employee { get; set; }
     }
 }
