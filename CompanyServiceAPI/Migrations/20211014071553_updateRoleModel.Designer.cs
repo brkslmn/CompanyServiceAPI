@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyServiceAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211005063603_UpdateModels2")]
-    partial class UpdateModels2
+    [Migration("20211014071553_updateRoleModel")]
+    partial class updateRoleModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -158,24 +158,16 @@ namespace CompanyServiceAPI.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("PasswordHash")
+                        .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("Role")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("PasswordSalt")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Username")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
 
                     b.ToTable("User");
                 });
@@ -223,9 +215,11 @@ namespace CompanyServiceAPI.Migrations
 
             modelBuilder.Entity("CompanyServiceAPI.Models.Department", b =>
                 {
-                    b.HasOne("CompanyServiceAPI.Models.Company", null)
+                    b.HasOne("CompanyServiceAPI.Models.Company", "Company")
                         .WithMany("Department")
                         .HasForeignKey("CompanyId");
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("CompanyServiceAPI.Models.Employee", b =>
@@ -235,13 +229,6 @@ namespace CompanyServiceAPI.Migrations
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("CompanyServiceAPI.Models.User", b =>
-                {
-                    b.HasOne("CompanyServiceAPI.Models.Role", null)
-                        .WithMany("User")
-                        .HasForeignKey("RoleId");
                 });
 
             modelBuilder.Entity("CompanyServiceAPI.Models.UserLog", b =>
@@ -281,11 +268,6 @@ namespace CompanyServiceAPI.Migrations
             modelBuilder.Entity("CompanyServiceAPI.Models.Employee", b =>
                 {
                     b.Navigation("UserLog");
-                });
-
-            modelBuilder.Entity("CompanyServiceAPI.Models.Role", b =>
-                {
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

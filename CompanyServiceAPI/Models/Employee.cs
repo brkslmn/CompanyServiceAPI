@@ -13,7 +13,7 @@ namespace CompanyServiceAPI.Models
         {
            
             this.UserLog = new HashSet<UserLog>();
-            this.Role = new HashSet<Role>();
+            
         }
         [Key]
         public int Id { get; set; }
@@ -24,10 +24,8 @@ namespace CompanyServiceAPI.Models
         public int DepartmentId { get; set; }
         public System.DateTime StartsDateOfWork { get; set; }
         public float Salary { get; set; }
-        public int RoleId { get; set; }
 
        
         public virtual ICollection<UserLog> UserLog { get; set; }
-        public virtual ICollection<Role> Role { get; set; }
     }
 }

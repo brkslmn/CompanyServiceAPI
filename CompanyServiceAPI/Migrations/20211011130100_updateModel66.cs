@@ -2,7 +2,7 @@
 
 namespace CompanyServiceAPI.Migrations
 {
-    public partial class UpdateModels : Migration
+    public partial class updateModel66 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
