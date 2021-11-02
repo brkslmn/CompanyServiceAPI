@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CompanyServiceAPI.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace CompanyServiceAPI.Controllers
 {
@@ -15,17 +16,24 @@ namespace CompanyServiceAPI.Controllers
     public class CompaniesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<CompaniesController> _logger;
 
-        public CompaniesController(ApplicationDbContext context)
+        public CompaniesController
+        (
+            ApplicationDbContext context,
+            ILogger<CompaniesController> logger
+        )
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Companies
         [HttpGet]
-        //[Authorize]
+       
         public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
         {
+           
             return await _context.Company.Include(x=>x.Department).ToListAsync();
         }
 

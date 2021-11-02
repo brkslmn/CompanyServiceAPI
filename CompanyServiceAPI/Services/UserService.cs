@@ -38,7 +38,7 @@ namespace CompanyServiceAPI.Services
                 return null;
 
             var user = _context.User.SingleOrDefault(x => x.Username == username);
-
+            
             // check if username exists
             if (user == null)
                 return null;
@@ -163,5 +163,12 @@ namespace CompanyServiceAPI.Services
 
             return true;
         }
+
+        public void GetRole(string roleName)
+		{
+            var role = _context.User.Include(x => x.Role);
+
+            
+		}
     }
 }

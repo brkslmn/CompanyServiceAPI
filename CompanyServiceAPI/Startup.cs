@@ -29,10 +29,13 @@ namespace CompanyServiceAPI
     {
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
+        //private readonly SftpService _sftpService;
+
         public Startup(IWebHostEnvironment env, IConfiguration configuration)
         {
             _env = env;
             _configuration = configuration;
+            //_sftpService = sftpService;
         }
 
 
@@ -46,6 +49,7 @@ namespace CompanyServiceAPI
                 .AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
+            services.AddHttpContextAccessor();
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(_configuration.GetConnectionString("DevConnection")));
             services.AddCors();
@@ -55,11 +59,17 @@ namespace CompanyServiceAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CompanyServiceAPI", Version = "v1" });
             });
+            //services.AddConnections();
+            //var sftpConfigure = _configuration.GetSection("SftpConnectionConfig");
+            //services.Configure<SftpConfig>(sftpConfigure);
+            //var sftpConfig = sftpConfigure.Get<SftpConfig>();
+            //services.AddConnections()
+            OptionsConfigurationServiceCollectionExtensions.Configure<SftpConfig>(services, _configuration.GetSection("SftpConnectionConfig"));
 
-            var appSettingsSection = _configuration.GetSection("AppSettings");
+            var appSettingsSection = _configuration.GetSection("AppSettings");   
             services.Configure<AppSettings>(appSettingsSection);
-
             var appSettings = appSettingsSection.Get<AppSettings>();
+
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
             services.AddAuthentication(x =>
             {
@@ -68,32 +78,43 @@ namespace CompanyServiceAPI
             })
             .AddJwtBearer(x =>
             {
-                x.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = context =>
-                    {
-                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                        var userId = int.Parse(context.Principal.Identity.Name);
-                        var user = userService.GetById(userId);
-                        if (user == null)
-                        {
-                            context.Fail("Unauthorized");
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
+                //x.Events = new JwtBearerEvents
+                //{
+                //    OnTokenValidated = context =>
+                //    {
+                //        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                //        var userId = Convert.ToInt32(context.Principal.Identity.Name);
+                //        var user = userService.GetById(userId);
+                //        if (user == null)
+                //        {
+                //            context.Fail("Unauthorized");
+                //        }
+                //        return Task.CompletedTask;
+                //    }
+                //};
+                //x.RequireHttpsMetadata = false;
+                //x.SaveToken = true;
+                //x.TokenValidationParameters = new TokenValidationParameters
+                //{
+                //    ValidateIssuerSigningKey = true,
+                //    IssuerSigningKey = new SymmetricSecurityKey(key),
+                //    ValidateIssuer = false,
+                //    ValidateAudience = false
+                //};
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidIssuer = "http://localhost:5001",
+                    ValidAudience = "http://localhost:5000",
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });
 
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ISftpService, SftpService>();
             
         }
 
@@ -116,7 +137,7 @@ namespace CompanyServiceAPI
             app.UseAuthentication();
            
             app.UseHttpsRedirection();
-
+            
             app.UseRouting();
 
             app.UseAuthorization();

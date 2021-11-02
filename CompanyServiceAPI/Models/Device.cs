@@ -12,6 +12,5 @@ namespace CompanyServiceAPI.Models
 		public int id { get; set; }
 		public string DeviceName { get; set; }
 		public string Version { get; set; }
-		public byte UploadFile { get; set; }
 	}
 }

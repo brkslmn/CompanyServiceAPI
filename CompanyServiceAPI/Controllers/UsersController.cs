@@ -6,6 +6,8 @@ using CompanyServiceAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -26,43 +28,56 @@ namespace CompanyServiceAPI.Controllers
         private IUserService _userService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
+        private readonly ILogger<UsersController> _logger;
+        private readonly ApplicationDbContext _context;
 
         public UsersController(
             IUserService userService,
             IMapper mapper,
-            IOptions<AppSettings> appSettings)
+            IOptions<AppSettings> appSettings,
+            ILogger<UsersController> logger,
+            ApplicationDbContext context
+        )
         {
             _userService = userService;
             _mapper = mapper;
             _appSettings = appSettings.Value;
+            _logger = logger;
+            _context = context;
         }
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public IActionResult Authenticate([FromBody] AuthenticateModel model)
-        {
-            var user = _userService.Authenticate(model.Username, model.Password);
+        public IActionResult Authenticate([FromBody] AuthenticateModel model, int id)
 
-            if (user == null)
+
+		{
+			var user = _userService.Authenticate(model.Username, model.Password);
+            var roleName = _userService.GetById(user.Id).Role.Select(x => x.RoleName);
+
+            if (user == null)           
                 return BadRequest(new { message = "Username or password is incorrect" });
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-           
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString()),
                     new Claim(ClaimTypes.NameIdentifier, user.Username),
-                    new Claim(ClaimTypes.Role, user.Role.ToString()),
-                    
+					new Claim(ClaimTypes.Role, roleName.FirstOrDefault())
+
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
+            
+            //IEnumerable<string> roleNames = user.Role.Select(x => x.RoleName);
+            //var role = _context.Role.Include(x => x.RoleName);
 
             // return basic user info and authentication token
             return Ok(new
@@ -71,9 +86,11 @@ namespace CompanyServiceAPI.Controllers
                 Username = user.Username,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Role = user.Role,
+                RoleName = roleName,
                 Token = tokenString
-            });
+		    });
+         
+
         }
 
         [AllowAnonymous]
