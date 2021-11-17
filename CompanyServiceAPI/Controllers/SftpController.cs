@@ -1,5 +1,6 @@
 ﻿using CompanyServiceAPI.Models;
 using CompanyServiceAPI.Services;
+using CompanyServiceAPI.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace CompanyServiceAPI.Controllers
 {
@@ -21,16 +23,21 @@ namespace CompanyServiceAPI.Controllers
 		private ISftpService _sftpService;
 		private readonly ILogger<SftpController> _logger;
 		public SftpConfig SftpConfig { get; }
+		private readonly Utils _helpers;
+		private List<IFormFile> partingFiles;
 
 		public SftpController(
 			ISftpService sftpService,
 			ILogger<SftpController> logger,
-			Microsoft.Extensions.Options.IOptions<SftpConfig> sftpConfig
+			Microsoft.Extensions.Options.IOptions<SftpConfig> sftpConfig,
+			Utils helpers
+
 		)
 		{
 			_sftpService = sftpService;
 			SftpConfig = sftpConfig.Value;
 			_logger = logger;
+			_helpers = helpers;
 		}
 
 		[HttpGet]
@@ -39,8 +46,8 @@ namespace CompanyServiceAPI.Controllers
 			try
 			{
 				List<string> filesdir = new List<string>();
-
 				List<string> filesfile = new List<string>();
+
 				var files = _sftpService.ListAllFiles(remoteDirectory);
 				foreach (var file in files)
 				{
@@ -61,8 +68,8 @@ namespace CompanyServiceAPI.Controllers
 				}
 				return Ok(new
 				{
-					filesdir,
-					filesfile
+					dirs= filesdir,
+					files = filesfile
 				});
 			}
 			catch (Exception exception)
@@ -91,9 +98,24 @@ namespace CompanyServiceAPI.Controllers
 			try
 			{
 				//localFilePath = "C://Users//brkslmn/Desktop/Upload";
-				var thisfile = Request.Form.Files.First();
-				var Path = Request.Form.Keys.Last().ToString();
-				_sftpService.UploadFile(thisfile, Path);
+				
+				var thisfile = Request.Form.Files;
+				
+				foreach (var file in thisfile)
+				{
+
+					partingFiles = _helpers.SplitFile(file);
+
+					foreach (var partfile in partingFiles)
+					{
+						var Path = Request.Form.Keys.Last().ToString();
+						_sftpService.UploadFile(partfile, Path);
+					}
+
+					
+				}
+					
+					
 				return Ok(new
 				{
 					//fileName = thisfile.Name,

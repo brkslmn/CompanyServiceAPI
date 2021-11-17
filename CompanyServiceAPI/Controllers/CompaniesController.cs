@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using CompanyServiceAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNet.OData;
 
 namespace CompanyServiceAPI.Controllers
 {
@@ -29,8 +30,8 @@ namespace CompanyServiceAPI.Controllers
         }
 
         // GET: api/Companies
-        [HttpGet]
-       
+        [HttpGet, Authorize(Roles="Admin")]
+		[EnableQuery(PageSize=2)]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
         {
            

@@ -67,7 +67,8 @@ namespace CompanyServiceAPI.Controllers
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString()),
                     new Claim(ClaimTypes.NameIdentifier, user.Username),
-					new Claim(ClaimTypes.Role, roleName.FirstOrDefault())
+					new Claim(ClaimTypes.Role, roleName.First()),
+                    new Claim(ClaimTypes.Role, roleName.Last())
 
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),

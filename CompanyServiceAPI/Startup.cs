@@ -19,9 +19,10 @@ using CompanyServiceAPI.Helpers;
 using CompanyServiceAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
-using AutoMapper;
-using Newtonsoft;
-
+using Microsoft.AspNetCore;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData.Edm;
+using Microsoft.AspNet.OData.Builder;
 
 namespace CompanyServiceAPI
 {
@@ -35,37 +36,38 @@ namespace CompanyServiceAPI
         {
             _env = env;
             _configuration = configuration;
-            //_sftpService = sftpService;
         }
 
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddMvc().AddJsonOptions(options => {
-            //    options.SerializerSettings.MaxDepth = 64;
-            //});
+
             services.AddControllersWithViews()
                 .AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
+            
             services.AddHttpContextAccessor();
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(_configuration.GetConnectionString("DevConnection")));
+            
             services.AddCors();
-            services.AddControllers();
+
+            services.AddControllers(mvcOptions =>
+                mvcOptions.EnableEndpointRouting = false);
+
+			services.AddOData();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CompanyServiceAPI", Version = "v1" });
             });
-            //services.AddConnections();
-            //var sftpConfigure = _configuration.GetSection("SftpConnectionConfig");
-            //services.Configure<SftpConfig>(sftpConfigure);
-            //var sftpConfig = sftpConfigure.Get<SftpConfig>();
-            //services.AddConnections()
+            
             OptionsConfigurationServiceCollectionExtensions.Configure<SftpConfig>(services, _configuration.GetSection("SftpConnectionConfig"));
-
             var appSettingsSection = _configuration.GetSection("AppSettings");   
             services.Configure<AppSettings>(appSettingsSection);
             var appSettings = appSettingsSection.Get<AppSettings>();
@@ -78,43 +80,34 @@ namespace CompanyServiceAPI
             })
             .AddJwtBearer(x =>
             {
-                //x.Events = new JwtBearerEvents
-                //{
-                //    OnTokenValidated = context =>
-                //    {
-                //        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                //        var userId = Convert.ToInt32(context.Principal.Identity.Name);
-                //        var user = userService.GetById(userId);
-                //        if (user == null)
-                //        {
-                //            context.Fail("Unauthorized");
-                //        }
-                //        return Task.CompletedTask;
-                //    }
-                //};
-                //x.RequireHttpsMetadata = false;
-                //x.SaveToken = true;
-                //x.TokenValidationParameters = new TokenValidationParameters
-                //{
-                //    ValidateIssuerSigningKey = true,
-                //    IssuerSigningKey = new SymmetricSecurityKey(key),
-                //    ValidateIssuer = false,
-                //    ValidateAudience = false
-                //};
+                x.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                        var userId = Convert.ToInt32(context.Principal.Identity.Name);
+                        var user = userService.GetById(userId);
+                        if (user == null)
+                        {
+                            context.Fail("Unauthorized");
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "http://localhost:5001",
-                    ValidAudience = "http://localhost:5000",
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
                 };
             });
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISftpService, SftpService>();
+            services.AddScoped<Utils>();
             
         }
 
@@ -122,7 +115,7 @@ namespace CompanyServiceAPI
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApplicationDbContext applicationDbContext)
         {
             applicationDbContext.Database.Migrate();
-
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -133,6 +126,11 @@ namespace CompanyServiceAPI
                .AllowAnyOrigin()
                .AllowAnyMethod()
                .AllowAnyHeader());
+            
+            //app.UseMvc(routeBuilder =>
+            //{
+            //    routeBuilder.EnableDependencyInjection();
+            //});
 
             app.UseAuthentication();
            
@@ -144,8 +142,23 @@ namespace CompanyServiceAPI
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.EnableDependencyInjection();
+                endpoints.Select().Filter().Expand().OrderBy().MaxTop(null).Count();
                 endpoints.MapControllers();
+                endpoints.MapODataRoute("CompanyServiceAPI", "api", GetEdmModel());
+             
             });
+
+           
+        }
+        private static IEdmModel GetEdmModel()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+
+            builder.EntitySet<Device>("Devices").EntityType.HasKey(a => a.id);
+
+            return builder.GetEdmModel();
         }
     }
+    
 }

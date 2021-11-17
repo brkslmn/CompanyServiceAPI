@@ -4,6 +4,8 @@ using Microsoft.Extensions.Hosting;
 using System.IO;
 using System.Net.Http.Headers;
 using CompanyServiceAPI.Services;
+using System.Net.Http;
+using System;
 
 namespace CompanyServiceAPI.Controllers
 {
@@ -12,42 +14,35 @@ namespace CompanyServiceAPI.Controllers
     [ApiController]
     public class UploadController : Controller
     {
-		private IWebHostEnvironment _hostingEnvironment;
+        //public bool UploadFile(string FileName)
+        //{
+        //    bool rslt = false;
+        //    using (var client = new HttpClient())
+        //    {
+        //        using (var content = new MultipartFormDataContent())
+        //        {
+        //            var fileContent = new ByteArrayContent(System.IO.File.ReadAllBytes(FileName));
+        //            fileContent.Headers.ContentDisposition = new
+        //                ContentDispositionHeaderValue("attachment")
+        //            {
+        //                FileName = Path.GetFileName(FileName)
+        //            };
+        //            content.Add(fileContent);
 
-        public UploadController(IWebHostEnvironment hostingEnvironment)
-        {
-            _hostingEnvironment = hostingEnvironment;
-            
-        }
-
-        [HttpPost, DisableRequestSizeLimit]
-        public ActionResult UploadFile()
-        {
-            try
-            {
-                var file = Request.Form.Files[0];
-                string folderName = "Upload";
-                string localRootPath = "C://Users//brkslmn/Desktop";
-                string newPath = Path.Combine(localRootPath, folderName);
-                if (!Directory.Exists(newPath))
-                {
-                    Directory.CreateDirectory(newPath);
-                }
-                if (file.Length > 0)
-                {
-                    string fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                    string fullPath = Path.Combine(newPath, fileName);
-                    using (var stream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        file.CopyTo(stream);
-                    }
-                }
-                return Json("Upload Successful.");
-            }
-            catch (System.Exception ex)
-            {
-                return Json("Upload Failed: " + ex.Message);
-            }
-        }
+        //            var requestUri = "http://localhost:8170/Home/UploadFile/";
+        //            try
+        //            {
+        //                var result = client.PostAsync(requestUri, content).Result;
+        //                rslt = true;
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                // log error
+        //                rslt = false;
+        //            }
+        //        }
+        //    }
+        //    return rslt;
+        //}
     }
 }

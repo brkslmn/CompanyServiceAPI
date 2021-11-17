@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using CompanyServiceAPI.Models;
+using CompanyServiceAPI.Helpers;
+using CompanyServiceAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using FluentFTP;
 using Microsoft.Extensions.Logging;
@@ -13,6 +15,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
+using FragmentedFileUpload;
 
 
 namespace CompanyServiceAPI.Services
@@ -27,7 +30,9 @@ namespace CompanyServiceAPI.Services
     }
     public class SftpService : ISftpService
     {
-        private readonly ILogger<SftpService> _logger;
+
+		private readonly ILogger<SftpService> _logger;
+
         
         public SftpConfig SftpConfig { get; }
 
@@ -53,7 +58,9 @@ namespace CompanyServiceAPI.Services
             {
                 client.Connect();
                 string sftpPath = remotePath + "/" + file.FileName;
+
                 client.UploadFile(file.OpenReadStream(), sftpPath);
+  
                 
                 _logger.LogInformation($"Finished uploading file to.");
             }

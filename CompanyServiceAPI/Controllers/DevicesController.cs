@@ -6,12 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CompanyServiceAPI.Models;
+using Microsoft.AspNet.OData;
 
 namespace CompanyServiceAPI.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class DevicesController : ControllerBase
+   
+   
+    public class DevicesController : ODataController
     {
         private readonly ApplicationDbContext _context;
 
@@ -22,13 +23,15 @@ namespace CompanyServiceAPI.Controllers
 
         // GET: api/Devices
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Device>>> GetDevice()
+        [EnableQuery]
+        public async Task<ActionResult<IEnumerable<Device>>> Get()
         {
             return await _context.Device.ToListAsync();
         }
 
         // GET: api/Devices/5
         [HttpGet("{id}")]
+        [EnableQuery]
         public async Task<ActionResult<Device>> GetDevice(int id)
         {
             var device = await _context.Device.FindAsync(id);
@@ -103,5 +106,13 @@ namespace CompanyServiceAPI.Controllers
         {
             return _context.Device.Any(e => e.id == id);
         }
+
+		//[HttpGet("DeviceNumber")]
+  //      public async Task<IActionResult> GetDeviceNumber()
+		//{
+
+  //          var DeviceNumber = await _context.Device.CountAsync();
+  //          return Ok(DeviceNumber);
+		//}
     }
 }
