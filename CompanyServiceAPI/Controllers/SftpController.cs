@@ -23,14 +23,14 @@ namespace CompanyServiceAPI.Controllers
 		private ISftpService _sftpService;
 		private readonly ILogger<SftpController> _logger;
 		public SftpConfig SftpConfig { get; }
-		private readonly Utils _helpers;
+		private readonly FileParser _helpers;
 		private List<IFormFile> partingFiles;
 
 		public SftpController(
 			ISftpService sftpService,
 			ILogger<SftpController> logger,
 			Microsoft.Extensions.Options.IOptions<SftpConfig> sftpConfig,
-			Utils helpers
+			FileParser helpers
 
 		)
 		{
@@ -45,21 +45,22 @@ namespace CompanyServiceAPI.Controllers
 		{
 			try
 			{
-				List<string> filesdir = new List<string>();
-				List<string> filesfile = new List<string>();
+				List<string> filesList = new List<string>();
+				List<string> filesDir = new List<string>();
+				
 
-				var files = _sftpService.ListAllFiles(remoteDirectory);
+				var files = _sftpService.ListAllFilesFtp(remoteDirectory);
 				foreach (var file in files)
 				{
-					if (file.IsDirectory)
+					if (file.Type == FluentFTP.FtpFileSystemObjectType.Directory)//FluentFTP.FtpFileSystemObjectType.Di....
 					{
 
-						filesdir.Add(file.FullName);
+						filesDir.Add(file.Name);
 
 					}
-					else if (file.IsRegularFile)
+					else if (file.Type != FluentFTP.FtpFileSystemObjectType.Directory)
 					{
-						filesfile.Add(file.FullName);
+						filesList.Add(file.Name);
 					}
 					else
 					{
@@ -68,8 +69,9 @@ namespace CompanyServiceAPI.Controllers
 				}
 				return Ok(new
 				{
-					dirs= filesdir,
-					files = filesfile
+					dirs = filesDir,
+					files= filesList
+					
 				});
 			}
 			catch (Exception exception)
@@ -78,6 +80,8 @@ namespace CompanyServiceAPI.Controllers
 				return null;
 			}
 		}
+	
+
 		[HttpGet("DownloadFile")]
 		public IActionResult DownloadSftpFile(string remoteFilePath, string localFilePath)
 		{
@@ -100,22 +104,21 @@ namespace CompanyServiceAPI.Controllers
 				//localFilePath = "C://Users//brkslmn/Desktop/Upload";
 				
 				var thisfile = Request.Form.Files;
-				
+				var Keylist = Request.Form.Keys;
+
+				var MaxFileSize = Request.Form["MaxFileSize"];
+
+
 				foreach (var file in thisfile)
 				{
-
-					partingFiles = _helpers.SplitFile(file);
+					partingFiles = _helpers.SplitFile(file, int.Parse(MaxFileSize));
 
 					foreach (var partfile in partingFiles)
 					{
 						var Path = Request.Form.Keys.Last().ToString();
 						_sftpService.UploadFile(partfile, Path);
 					}
-
-					
-				}
-					
-					
+				}	
 				return Ok(new
 				{
 					//fileName = thisfile.Name,

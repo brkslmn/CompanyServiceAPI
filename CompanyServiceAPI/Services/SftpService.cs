@@ -2,32 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using CompanyServiceAPI.Models;
-using CompanyServiceAPI.Helpers;
-using CompanyServiceAPI.Controllers;
-using Microsoft.AspNetCore.Mvc;
 using FluentFTP;
 using Microsoft.Extensions.Logging;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
-using CompanyServiceAPI.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging.Abstractions;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Net.Http.Headers;
-using FragmentedFileUpload;
 
 
 namespace CompanyServiceAPI.Services
 {
     public interface ISftpService
     {
-        IEnumerable<SftpFile> ListAllFiles(string remoteDirectory);
+        dynamic ListAllFilesFtp(string remoteDirectory);
         void DownloadFile(string remoteFilePath, string localFilePath);
         void UploadFile(IFormFile file,string remotePath);
         void DeleteFile(string remoteFilePath);
 
     }
+
     public class SftpService : ISftpService
     {
 
@@ -42,24 +34,25 @@ namespace CompanyServiceAPI.Services
             SftpConfig = sftpConfig.Value;
         }
 
-        public IEnumerable<SftpFile> ListAllFiles(string remoteDirectory)
+        public dynamic ListAllFilesFtp(string remoteDirectory)
         {
-            using var client = new SftpClient(SftpConfig.Host, SftpConfig.Port, SftpConfig.UserName, SftpConfig.Password);
+            using var client = new FtpClient(SftpConfig.Host, SftpConfig.Port, SftpConfig.UserName, SftpConfig.Password);
             
             client.Connect();
-            return client.ListDirectory(remoteDirectory);
+            
+            return client.GetListing(remoteDirectory);
 
         }
 
         public void UploadFile(IFormFile file,string remotePath)
         {
-            using var client = new SftpClient(SftpConfig.Host, SftpConfig.Port, SftpConfig.UserName, SftpConfig.Password);
+            using var client = new FtpClient(SftpConfig.Host, SftpConfig.Port, SftpConfig.UserName, SftpConfig.Password);
             try
             {
                 client.Connect();
                 string sftpPath = remotePath + "/" + file.FileName;
 
-                client.UploadFile(file.OpenReadStream(), sftpPath);
+                client.Upload(file.OpenReadStream(), sftpPath);
   
                 
                 _logger.LogInformation($"Finished uploading file to.");
@@ -77,12 +70,12 @@ namespace CompanyServiceAPI.Services
 
         public void DownloadFile(string remoteFilePath, string localFilePath)
         {
-            using var client = new SftpClient(SftpConfig.Host, SftpConfig.Port, SftpConfig.UserName, SftpConfig.Password);
+            using var client = new FtpClient(SftpConfig.Host, SftpConfig.Port, SftpConfig.UserName, SftpConfig.Password);
             try
             {
                 client.Connect();
                 using var s = File.Create(localFilePath);
-                client.DownloadFile(remoteFilePath, s);
+                client.Download(s, remoteFilePath);
                 _logger.LogInformation($"Finished downloading file [{localFilePath}] from [{remoteFilePath}]");
             }
             catch (Exception exception)
@@ -97,7 +90,7 @@ namespace CompanyServiceAPI.Services
 
         public void DeleteFile(string remoteFilePath)
         {
-            using var client = new SftpClient(SftpConfig.Host, SftpConfig.Port, SftpConfig.UserName, SftpConfig.Password);
+            using var client = new FtpClient(SftpConfig.Host, SftpConfig.Port, SftpConfig.UserName, SftpConfig.Password);
             try
             {
                 client.Connect();
@@ -113,5 +106,5 @@ namespace CompanyServiceAPI.Services
                 client.Disconnect();
             }
         }
-    }
+	}
 }

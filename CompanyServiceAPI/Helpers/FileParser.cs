@@ -9,31 +9,31 @@ using System.Threading.Tasks;
 namespace CompanyServiceAPI.Helpers
 {
 	
-	public class Utils
+	public class FileParser
 	{
 		public string FileName { get; set; }
 		public float MaxFileSizeMB { get; set; }
 		public List<IFormFile> FileParts { get; set; }
 		public IFormFile FormFileParts { get; set; }
 
-		public Utils()
+		public FileParser()
 		{
 			FileParts = new List<IFormFile>();
 		}
 
 
 
-		public List<IFormFile> SplitFile(IFormFile file)
+		public List<IFormFile> SplitFile(IFormFile file, float MaxFileSize)
 		{
 			
 			string FileName = file.FileName;
-			int BufferChunkSize = (int)(33.3 * 1024);
+			int BufferChunkSize = (int)(MaxFileSize * 1024);
 			const int READBUFFER_SIZE = 1024;
 			byte[] FSBuffer = new byte[READBUFFER_SIZE];
 			using (FileStream FS = new FileStream(FileName, FileMode.Create, (FileAccess)FileShare.ReadWrite))
 			{
 				
-				file.CopyToAsync(FS);
+				file.CopyTo(FS);
 				int TotalFileParts = 0;
 				if (file.Length < BufferChunkSize)
 				{
@@ -66,13 +66,18 @@ namespace CompanyServiceAPI.Helpers
 						}
 						
 						FileParts.Add(new FormFile(ms,0,ms.Length, FilePartName, FilePartName));
+						
 					}
 					FilePartCount++;
+					File.Delete(FilePartName);
+
 
 
 				}
-
+				FS.Close();
+				File.Delete(FS.Name);
 			}
+			
 			return FileParts;
 		}
 

@@ -107,7 +107,7 @@ namespace CompanyServiceAPI
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISftpService, SftpService>();
-            services.AddScoped<Utils>();
+            services.AddScoped<FileParser>();
             
         }
 
